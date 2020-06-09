@@ -84,16 +84,30 @@ elif choice == "Plots":
     filename = file_selector()
     st.write('You selected `%s`' % filename)
     data = pd.read_csv(filename)
-    species = st.multiselect('Show fearures', data.columns)
-    if species == []:
-        st.text("Please select a column")
-    elif len(species) == 1:
-        st.text("Please enter two columns")
-    else:
-        col1 = species[0]
-        col2 = species[1]
-        new_df = data[species]
-        st.write(new_df)
-        fig = px.scatter(new_df, x =col1,y=col2)
-        st.plotly_chart(fig)
+    categorical_columns = data.select_dtypes(exclude=['int','float64']).columns
+    numerical_columns = data.select_dtypes(exclude=['object']).columns
+    types = st.selectbox('select type of columns',['categorical','numerical'])
+    if types=='numerical':
+        chart_type = st.radio('Select plot type',['scatterplot','correlation plot'])
+        if chart_type == 'scatterplot':
+            species = st.multiselect('Show fearures', numerical_columns)
+            if species == []:
+                st.text("Please select a column")
+            elif len(species) == 1:
+                st.text("Please enter two columns")
+            else:
+                col1 = species[0]
+                col2 = species[1]
+                new_df = data[species]
+                st.write(new_df)
+                fig = px.scatter(new_df, x =col1,y=col2)
+                st.plotly_chart(fig)
+        elif chart_type == 'correlation plot':
+            #st.text("Correlation Plot")
+            ax = sns.heatmap(data.corr(),annot=True,cmap="YlGnBu")
+            ax.set_title("Correlation Plot")
+            st.write(ax)
+            st.pyplot()
+    elif types == 'categorical':
+        st.text("Coming soon")
 
